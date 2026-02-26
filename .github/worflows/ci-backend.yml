@@ -1,0 +1,28 @@
+name: Build and save my Docker image to a regitry
+
+on:
+  push:
+    branches:
+      - main  # Déclenchement lorsque le code est poussé sur main
+
+env:
+  REG_NAME: "acrinfofd22210.azurecr.io" # Nom du registy
+  IMAGE_NAME: "info210-retro-nolhan" # Nom de votre image
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: login
+        run: | # le echo, | et stdin c'est pour ne pas afficher le mdp dans les logs 
+          echo "${{ secrets.PASSWORD }}" | docker login ${{ env.REG_NAME }} -u ${{ secrets.USERNAME }} --password-stdin
+      - name: build
+        run: |
+          docker build -t ${{ env.REG_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} ./api/
+      - name:
+        run: | 
+          docker push ${{ env.REG_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
